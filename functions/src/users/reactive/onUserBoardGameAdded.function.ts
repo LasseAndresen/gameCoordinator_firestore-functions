@@ -19,18 +19,18 @@ exports.onUserBoardGameAdded = functions.firestore.document('Users/{userGUID}/Bo
         console.log('Snapshot data ', boardGameData);
         const toWrite = {
             name: boardGameData?.name ?? 'Null',
-            owners: [...userGUID]
+            owners: admin.firestore.FieldValue.arrayUnion(userGUID)
         };
 
         const batch = admin.firestore().batch();
-        const groups = await userDoc.collection('Groups').where('members', 'array-contains', userGUID).get();
-        groups.forEach(doc => {
+        const groups = await (await admin.firestore().collection('Groups')).where('members', 'array-contains', userGUID).get();
+        groups.docs.forEach(doc => {
             batch.update(doc.ref, {
-                boardGames: [...boardGameID] // admin.firestore.FieldValue.arrayUnion([userGUID])
+                boardGames: admin.firestore.FieldValue.arrayUnion(boardGameID) // [...boardGameID]
             });
             const docRef = doc.ref.collection('BoardGames').doc(boardGameID);
-            batch.set(docRef, toWrite);
+            batch.set(docRef, toWrite, {merge: true});
         });
 
-        return batch.commit();
+        return await batch.commit();
     });

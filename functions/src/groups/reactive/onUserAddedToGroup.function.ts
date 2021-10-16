@@ -16,7 +16,7 @@ exports.onUserAddedToGroup = functions.firestore.document('Groups/{groupID}/User
             const boardGameData = doc.data();
             const toWrite = {
                 name: boardGameData.name,
-                owner: userGUID
+                owners: admin.firestore.FieldValue.arrayUnion(userGUID)
             };
             batch.set(docRef, toWrite);
         });
