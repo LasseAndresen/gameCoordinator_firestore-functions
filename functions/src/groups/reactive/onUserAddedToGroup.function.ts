@@ -1,16 +1,16 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-exports.onUserAddedToGroup = functions.firestore.document('Groups/{groupID}/Users/{userGUID}')
+exports.onUserAddedToGroup = functions.firestore.document('Groups/{groupID}/Members/{userGUID}')
     .onCreate(async (snapshot: any, context: any) => {
         const userGUID = context.params.userGUID;
         const groupID = context.params.groupID;
-        const userBoardGames = await admin.firestore().collection('Users/ + ' + userGUID + '/BoardGames').get();
+        const userBoardGames = await admin.firestore().collection('Users/' + userGUID + '/BoardGames').get();
         const groupDocumentRef = admin.firestore().collection('Groups').doc(groupID);
         const groupBoardGameRef = groupDocumentRef.collection('BoardGames');
         const boardGameGUIDs: string[] = [];
         const batch = admin.firestore().batch();
-        userBoardGames.forEach(doc => {
+        userBoardGames.docs.forEach(doc => {
             boardGameGUIDs.push(doc.id);
             const docRef = groupBoardGameRef.doc(doc.id);
             const boardGameData = doc.data();
@@ -24,6 +24,6 @@ exports.onUserAddedToGroup = functions.firestore.document('Groups/{groupID}/User
 
         return groupDocumentRef.update({
             members: admin.firestore.FieldValue.arrayUnion(userGUID),
-            boardGames: admin.firestore.FieldValue.arrayUnion(boardGameGUIDs)
+            boardGames: admin.firestore.FieldValue.arrayUnion(...boardGameGUIDs)
         });
     });
