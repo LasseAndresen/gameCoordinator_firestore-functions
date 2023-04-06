@@ -1,7 +1,6 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { QueryDocumentSnapshot } from 'firebase-functions/lib/providers/firestore';
-
+import { QueryDocumentSnapshot } from 'firebase-functions/v1/firestore';
 exports.onUserBoardGameAdded = functions.firestore.document('Users/{userGUID}/BoardGames/{boardGameID}')
     .onCreate(async (snapshot: QueryDocumentSnapshot, context: functions.EventContext) => {
         console.log('Params ', context.params);
